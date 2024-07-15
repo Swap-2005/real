@@ -29,10 +29,11 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 app.use('/images', express.static('upload/images'));
 
-app.post('/upload', upload.single('plot'), (req, res) => {
+app.post('/upload', upload.array('images', 10), (req, res) => {
+    const imageUrls = req.files.map(file => `http://localhost:${port}/images/${file.filename}`);
     res.json({
         success: 1,
-        image_url: `http://localhost:${port}/images/${req.file.filename}`
+        image_urls: imageUrls
     });
 });
 
@@ -49,12 +50,12 @@ const plotSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    category:{
-        type:String,
-        required:true
-    },
-    image: {
+    category: {
         type: String,
+        required: true
+    },
+    images: {
+        type: [String],
         required: true
     },
     location: {
@@ -62,7 +63,7 @@ const plotSchema = new mongoose.Schema({
         required: true
     },
     size: {
-        type: Number,
+        type: String,
         required: true
     },
     price: {
@@ -95,8 +96,8 @@ app.post('/addplot', async (req, res) => {
         id: id,
         title: req.body.title,
         description: req.body.description,
-        category:req.body.category,
-        image: req.body.image,
+        category: req.body.category,
+        images: req.body.images,
         location: req.body.location,
         size: req.body.size,
         price: req.body.price,
@@ -126,127 +127,126 @@ app.get('/allplots', async (req, res) => {
 });
 
 // Creating endpoint for newListings data
-app.get('/newlistings',async(req,res)=>{
+app.get('/newlistings', async (req, res) => {
     let plots = await Plot.find({});
-    let newCollection=plots.slice(1).slice(-8);
+    let newCollection = plots.slice(1).slice(-8);
     console.log('New Plots fetched');
     res.json(newCollection);  // Ensure this is sending a JSON response
-})
+});
 
-//User Schema
-const UserSchema=new mongoose.Schema({
-    username:{
-        type:String,
+// User Schema
+const UserSchema = new mongoose.Schema({
+    username: {
+        type: String,
     },
-    email:{
-        type:String,
-        unique:true,
+    email: {
+        type: String,
+        unique: true,
     },
-    password:{
-        type:String,
+    password: {
+        type: String,
     },
-    cartData:{
-        type:Object,
+    cartData: {
+        type: Object,
     },
-    date:{
-        type:Date,
-        default:Date.now,
+    date: {
+        type: Date,
+        default: Date.now,
     }
-})
+});
 
-//User Model
+// User Model
 const Users = mongoose.model('Users', UserSchema);
 
-//creating middleware to fetch user
-const fetchUser = async(req,res,next)=>{
-    const token=req.header('auth-token');
-    if(!token){
-        res.status(401).json({errors:"please authenticate using valid token"})  // Ensure this is sending a JSON response
-    }
-    else{
-        try{
-            const data =jwt.verify(token,'secret_ecom');
+// Creating middleware to fetch user
+const fetchUser = async (req, res, next) => {
+    const token = req.header('auth-token');
+    if (!token) {
+        res.status(401).json({ errors: "please authenticate using valid token" });  // Ensure this is sending a JSON response
+    } else {
+        try {
+            const data = jwt.verify(token, 'secret_ecom');
             req.user = data.user;
             next();
-        }catch(error){
-            res.status(401).json({error:"Please authenticate using a valid token"})  // Ensure this is sending a JSON response
+        } catch (error) {
+            res.status(401).json({ error: "Please authenticate using a valid token" });  // Ensure this is sending a JSON response
         }
     }
- } 
+}
 
- app.post('/addtocart',fetchUser,async(req,res)=>{
-    console.log(req.body,req.user);
-    let userData = await Users.findOne({_id:req.user.id});
-    userData.cartData[req.body.itemId]+=1;
-    await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
+app.post('/addtocart', fetchUser, async (req, res) => {
+    console.log(req.body, req.user);
+    let userData = await Users.findOne({ _id: req.user.id });
+    userData.cartData[req.body.itemId] += 1;
+    await Users.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
     res.json({ message: "added" });  // Ensure this is sending a JSON response
-})
-// creating endpoint to remove product from cartdata
-app.post('/removefromcart',fetchUser,async(req,res)=>{
-    console.log('removed',req.body.itemId);
-    let userData = await Users.findOne({_id:req.user.id});
-    if(userData.cartData[req.body.itemId]>0){
-        userData.cartData[req.body.itemId]-=1;
-        await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
+});
+// Creating endpoint to remove product from cartdata
+app.post('/removefromcart', fetchUser, async (req, res) => {
+    console.log('removed', req.body.itemId);
+    let userData = await Users.findOne({ _id: req.user.id });
+    if (userData.cartData[req.body.itemId] > 0) {
+        userData.cartData[req.body.itemId] -= 1;
+        await Users.findOneAndUpdate({ _id: req.user.id }, { cartData: userData.cartData });
         res.json({ message: "Removed" });  // Ensure this is sending a JSON response
     } else {
         res.json({ message: "Item not in cart" });  // Ensure this is sending a JSON response
     }
-})
-//creating endpoint to get cart data
-app.post('/getcart',fetchUser,async(req,res)=>{
+});
+// Creating endpoint to get cart data
+app.post('/getcart', fetchUser, async (req, res) => {
     console.log('Get Cart');
-    let userData = await Users.findOne({_id:req.user.id})
+    let userData = await Users.findOne({ _id: req.user.id })
     res.json(userData.cartData);  // Ensure this is sending a JSON response
-})
+});
 
-//creating API end point for registering users
-app.post('/signup',async(req,res)=>{
-    let check=await Users.findOne({email:req.body.email});
-    if(check){
-        return res.status(400).json({success:false,errors:'existing user found'})  // Ensure this is sending a JSON response
+// Creating API endpoint for registering users
+app.post('/signup', async (req, res) => {
+    let check = await Users.findOne({ email: req.body.email });
+    if (check) {
+        return res.status(400).json({ success: false, errors: 'existing user found' })  // Ensure this is sending a JSON response
     }
-    let cart={};
-    for(let i=0;i<300;i++){
-        cart[i]=0;
+    let cart = {};
+    for (let i = 0; i < 300; i++) {
+        cart[i] = 0;
     }
-    const user=new Users({
-        username:req.body.username,
-        email:req.body.email,
-        password:req.body.password,
-        cartData:cart,
+    const user = new Users({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        cartData: cart,
     })
 
     await user.save();
-    const data={
-        user:{
-            id:user.id
+    const data = {
+        user: {
+            id: user.id
         }
     }
-    const token=jwt.sign(data,'secret_ecom');
-    res.json({success:true,token})  // Ensure this is sending a JSON response
+    const token = jwt.sign(data, 'secret_ecom');
+    res.json({ success: true, token })  // Ensure this is sending a JSON response
 })
 
-//creating endpoint for user login
-app.post('/login',async(req,res)=>{
-    let user=await Users.findOne({email:req.body.email});
-    if(user){
+// Creating endpoint for user login
+app.post('/login', async (req, res) => {
+    let user = await Users.findOne({ email: req.body.email });
+    if (user) {
         const passCompare = req.body.password === user.password;
-        if(passCompare){
-            const data={
-                user:{
-                    id:user.id
+        if (passCompare) {
+            const data = {
+                user: {
+                    id: user.id
                 }
             }
-            const token=jwt.sign(data, 'secret_ecom');
-            res.json({success:true,token});  // Ensure this is sending a JSON response
+            const token = jwt.sign(data, 'secret_ecom');
+            res.json({ success: true, token });  // Ensure this is sending a JSON response
         }
-        else{
-            res.json({success:false,errors:"Wrong password"});  // Ensure this is sending a JSON response
+        else {
+            res.json({ success: false, errors: "Wrong password" });  // Ensure this is sending a JSON response
         }
     }
-    else{
-        res.json({success:false,errors:'wrong email Id'})  // Ensure this is sending a JSON response
+    else {
+        res.json({ success: false, errors: 'wrong email Id' })  // Ensure this is sending a JSON response
     }
 })
 

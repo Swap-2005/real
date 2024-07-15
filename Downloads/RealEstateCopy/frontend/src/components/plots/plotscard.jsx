@@ -13,14 +13,14 @@ const Plots = (props) => {
     <>
       <div className='content grid3 mtop'>
         {allPlots.map((val, index) => {
-          const { image, category, location, name, price, size } = val;
+          const { images, category, location, name, price, size } = val;
           if (props.location.toLowerCase() === location.toLowerCase() && props.category.toLowerCase() === category.toLowerCase()){
           return (
             
             <div className='box shadow' key={index}>
                 
               <div className='img'>
-              <Link to={`/plot/${val.id}`}><img src={image} alt='' /></Link>
+              <Link to={`/plot/${val.id}`}><img src={images[0]} alt='' /></Link>
               </div>
               <div className='text'>
                 <div className='category flex'>
@@ -36,7 +36,7 @@ const Plots = (props) => {
                 <div>
                   <button className='btn2'>${price}</button> <label htmlFor=''>/sqft</label>
                 </div>
-                <span>{size} sqft</span>
+                <span>{size}</span>
               </div>
             </div>
           )}

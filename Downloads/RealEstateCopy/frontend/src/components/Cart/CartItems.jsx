@@ -27,10 +27,10 @@ const CartItems = () => {
                                 return (
                                     <tr key={plot.id}>
                                         <td className='px-4 py-2'>
-                                        <Link to={`/plot/${plot.id}`}><img src={plot.image} alt={plot.title} className='w-18 h-20' /></Link>
+                                        <Link to={`/plot/${plot.id}`}><img src={plot.images[0]} alt={plot.title} className='w-18 h-20' /></Link>
                                         </td>
                                         <td className='px-4 py-2'>{plot.title}</td>
-                                        <td className='px-4 py-2'>{plot.size.toFixed(2)} sqft</td>
+                                        <td className='px-4 py-2'>{plot.size}</td>
                                         <td className='px-4 py-2'>{(plot.price * cartItems[plot.id]).toFixed(2)}</td>
                                         <td className='px-4 py-2'>{plot.location}</td>
                                         <td className='px-4 py-2'>

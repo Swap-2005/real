@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import upload_area from '../components/Assets/Admin_Assets/upload_area.svg';
 
 const AddPlot = () => {
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [plotDetails, setPlotDetails] = useState({
     title: "",
     description: "",
@@ -13,7 +13,7 @@ const AddPlot = () => {
   });
 
   const imageHandler = (e) => {
-    setImage(e.target.files[0]);
+    setImages([...images, ...e.target.files]);
   };
 
   const changeHandler = (e) => {
@@ -25,18 +25,22 @@ const AddPlot = () => {
     let responseData;
     let plot = plotDetails;
     let formData = new FormData();
-    formData.append('plot', image);
+
+    images.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
 
     await fetch('http://localhost:5000/upload', {
       method: 'POST',
-      headers: {
-        Accept: 'application/json',
-      },
       body: formData,
-    }).then((res) => res.json()).then((data) => { responseData = data });
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        responseData = data;
+      });
 
     if (responseData.success) {
-      plot.image = responseData.image_url;
+      plot.images = responseData.image_urls;
       console.log(plot);
       await fetch('http://localhost:5000/addplot', {
         method: 'POST',
@@ -45,9 +49,11 @@ const AddPlot = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(plot),
-      }).then((res) => res.json()).then((data) => {
-        data.success ? alert('Plot Added') : alert('Failed')
-      });
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          data.success ? alert('Plot Added') : alert('Failed');
+        });
     }
   };
 
@@ -71,24 +77,30 @@ const AddPlot = () => {
             <option value="commercial properties/shops">Commercial Properties/Shops</option>
           </select>
 
-
           <label htmlFor="location">Location</label>
           <input value={plotDetails.location} onChange={changeHandler} type="text" id="location" placeholder='Type here' name='location' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
 
-          <label htmlFor="size">Size</label>
+          <label htmlFor="size">{plotDetails.category === 'house/villa' ? 'Built Area' : 'Size'}</label>
           <input value={plotDetails.size} onChange={changeHandler} type="text" id="size" placeholder='Type here' name='size' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
 
           <label htmlFor="price">Price</label>
           <input value={plotDetails.price} onChange={changeHandler} type="text" id="price" placeholder='Type here' name='price' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
 
-          <label htmlFor="plotImage" className='font-medium'>Plot Image <img src={image ? URL.createObjectURL(image) : upload_area} alt="" className='w-40 h-44' /></label>
-          <input onChange={imageHandler} type="file" name='image' id='plotImage' hidden />
-
+          <label htmlFor="plotImages" className='font-medium'>Plot Images</label>
+          <input onChange={imageHandler} type="file" name='images' id='plotImages' multiple />
+          {images.length > 0 && (
+            <div>
+              {Array.from(images).map((image, index) => (
+                <img key={index} src={URL.createObjectURL(image)} alt="" className='w-40 h-44' />
+              ))}
+            </div>
+          )}
+          
           <button type="button" onClick={addPlot} className='border-2 border-blue-400 bg-blue-400 rounded-lg px-10 py-1'>ADD</button>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default AddPlot;

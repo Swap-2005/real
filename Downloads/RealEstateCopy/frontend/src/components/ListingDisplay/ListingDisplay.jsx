@@ -11,13 +11,13 @@ const ListingDisplay = ({ plot }) => {
                 <div className='flex'>
                     
                     <div className='main-image'>
-                        <img src={plot.image} alt="" />
+                        <img src={plot.images[0]} alt="" />
                     </div>
                 </div>
                 <div className='product-details'>
                     <h1 className='product-title'>{plot.title}</h1>
                     <div className='product-info'>
-                        <div>{plot.size} sqft</div>
+                        <div>{plot.size}</div>
                         <div>{plot.price}</div>
                     </div>
                     <div className='product-description'>

@@ -14,11 +14,11 @@ const RecentCard = () => {
     <>
       <div className='content grid3 mtop'>
         {newListings.map((val, index) => {
-          const { image, category, location, name, price, size } = val;
+          const { images, category, location, name, price, size } = val;
           return (
             <div className='box shadow' key={index}>
               <div className='img'>
-              <Link to={`/plot/${val.id}`}><img src={image} alt='' /></Link>
+              <Link to={`/plot/${val.id}`}><img src={images[0]} alt='' /></Link>
               </div>
               <div className='text'>
                 <div className='category flex'>
