@@ -62,6 +62,9 @@ const plotSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    nearby:{
+        type:String,
+    },
     size: {
         type: String,
         required: true
@@ -99,6 +102,7 @@ app.post('/addplot', async (req, res) => {
         category: req.body.category,
         images: req.body.images,
         location: req.body.location,
+        nearby:req.body.nearby,
         size: req.body.size,
         price: req.body.price,
     });

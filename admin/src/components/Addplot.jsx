@@ -5,9 +5,10 @@ const AddPlot = () => {
   const [images, setImages] = useState([]);
   const [plotDetails, setPlotDetails] = useState({
     title: "",
-    description: "",
+    description: "",  
     category: "",
     location: "",
+    nearby: "",
     size: "",
     price: ""
   });
@@ -73,15 +74,20 @@ const AddPlot = () => {
             <option value="open plots">Open Plots</option>
             <option value="house/villa">House/Villa</option>
             <option value="apartment">Apartment</option>
-            <option value="Farm/Agricultural Lands">Farm/Agricultural Lands</option>
+            <option value="farm/agricultural lands">Farm/Agricultural Lands</option>
             <option value="commercial properties/shops">Commercial Properties/Shops</option>
           </select>
 
           <label htmlFor="location">Location</label>
-          <input value={plotDetails.location} onChange={changeHandler} type="text" id="location" placeholder='Type here' name='location' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
-
+          <select name="location" id="location" value={plotDetails.location} onChange={changeHandler} className='bg-transparent border-2 border-black rounded-lg p-2 w-full'>
+          <option value="" disabled>Select Location</option>
+            <option value="nizamabad">Nizamabad</option>
+            <option value="hyderabad">Hyderabad</option>
+          </select>
           <label htmlFor="size">{plotDetails.category === 'house/villa' ? 'Built Area' : 'Size'}</label>
           <input value={plotDetails.size} onChange={changeHandler} type="text" id="size" placeholder='Type here' name='size' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
+          <label htmlFor="nearby">NearBy Location</label>
+          <input value={plotDetails.nearby} onChange={changeHandler} type="text" id="nearby" placeholder='Enter Nearby location' name='nearby' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />
 
           <label htmlFor="price">Price</label>
           <input value={plotDetails.price} onChange={changeHandler} type="text" id="price" placeholder='Type here' name='price' className='bg-transparent border-2 border-black rounded-lg p-2 w-full' />

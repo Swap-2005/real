@@ -60,7 +60,7 @@ const ManagePlots = () => {
                             <div className='flex gap-6'>
                                 <div><p>{plot.category}</p></div>
                                 <div><p>{plot.size} sqft</p></div>
-                                <div><p>${plot.price}</p></div>
+                                <div><p>{plot.price}</p></div>
                                 <div><p>{plot.address}</p></div>
                                 <div><button onClick={() => { remove_plot(plot.id) }}><img src={crossicon} alt="" /></button></div>
                             </div>

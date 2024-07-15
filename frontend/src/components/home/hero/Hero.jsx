@@ -30,7 +30,7 @@ const Hero = () => {
             <span>City/Street</span>
             <select className="dropdown" name="location" id="city" value={location} onChange={(e) => setLocation(e.target.value)}>
               <option value="Nizamabad">Nizamabad</option>
-              <option value="Hyderabad">Hyderabad</option>
+              <option value="hyderabad">Hyderabad</option>
             </select>
           </div>
           <div className="box">
